@@ -172,11 +172,23 @@ def _is_list_container(element: Any) -> bool:
     """
         Report whether an element is a list wrapper.
 
-        EC2 wraps every repeated structure in a container whose children are
-        all ``<item>``.  Detecting it structurally rather than by name means a
-        collection this code has never seen still decodes as a list rather
-        than collapsing into a single object — which is the failure that would
-        otherwise read as "one resource" or "none".
+        The two XML protocols spell repetition differently:
+
+        * **Query** (EC2) wraps repeated structures in a container whose
+          children are all ``<item>``;
+        * **REST-XML** (S3, Route53) repeats a NAMED element inside a
+          plural-named container — ``<HostedZones><HostedZone>...``.
+
+        Both are detected structurally, so a collection this code has never
+        seen still decodes as a list rather than collapsing into a single
+        object — the failure that would otherwise read as "one resource" or
+        "none".
+
+        The named form additionally requires the container to be the plural of
+        the child.  Without that, a single-field structure like
+        ``<placement><availabilityZone>..</availabilityZone></placement>``
+        would be mistaken for a one-element list, since it too has children
+        that all share a tag.
 
         :param element: The element to inspect.
 
@@ -187,12 +199,19 @@ def _is_list_container(element: Any) -> bool:
         rtnval = False
         return rtnval
 
-    for child in children:
-        if strip_namespace(child.tag) != "item":
-            rtnval = False
-            return rtnval
+    tags = {strip_namespace(child.tag) for child in children}
+    if len(tags) != 1:
+        rtnval = False
+        return rtnval
 
-    rtnval = True
+    child_tag = tags.pop()
+
+    if child_tag == "item":
+        rtnval = True
+        return rtnval
+
+    container = strip_namespace(element.tag)
+    rtnval = container == _pluralize_preserving(child_tag)
     return rtnval
 
 

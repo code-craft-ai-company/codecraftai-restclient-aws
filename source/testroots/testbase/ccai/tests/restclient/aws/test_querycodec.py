@@ -387,3 +387,51 @@ def test_scalars_are_stringified():
     assert params["MaxCount"] == "3"
     assert params["MinCount"] == "1"
     return
+
+
+def test_rest_xml_named_repetition_decodes_as_a_list():
+    """
+        REST-XML repeats a NAMED element inside a plural container, unlike
+        Query's <item> wrapper.
+    """
+    body = ("<ListHostedZonesResponse><HostedZones>"
+            "<HostedZone><Id>Z1</Id></HostedZone>"
+            "<HostedZone><Id>Z2</Id></HostedZone>"
+            "</HostedZones></ListHostedZonesResponse>")
+
+    zones = decode_response(body)["HostedZones"]
+
+    assert [entry["Id"] for entry in zones] == ["Z1", "Z2"]
+    return
+
+
+def test_single_field_structures_are_not_mistaken_for_lists():
+    """
+        A one-field structure also has children that all share a tag, so the
+        named-repetition rule must additionally require the container to be
+        the plural of the child.
+    """
+    body = ("<DescribeInstancesResponse><reservationSet><item>"
+            "<instancesSet><item><instanceId>i-1</instanceId>"
+            "<placement><availabilityZone>us-east-1a</availabilityZone>"
+            "</placement></item></instancesSet>"
+            "</item></reservationSet></DescribeInstancesResponse>")
+
+    instance = decode_response(body)["Reservations"][0]["Instances"][0]
+
+    # Placement is a structure, not a one-element list.
+    assert instance["Placement"] == {"AvailabilityZone": "us-east-1a"}
+    return
+
+
+def test_singleton_named_repetition_still_decodes_as_a_list():
+    body = ("<Resp><HostedZones><HostedZone><Id>Z1</Id></HostedZone>"
+            "</HostedZones></Resp>")
+
+    zones = decode_response(body)["HostedZones"]
+
+    # One zone is still a list; collapsing it would break every caller that
+    # iterates the result.
+    assert isinstance(zones, list) is True
+    assert len(zones) == 1
+    return
