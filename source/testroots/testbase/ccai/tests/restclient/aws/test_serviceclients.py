@@ -16,7 +16,7 @@ import urllib.parse
 
 from typing import Any, Dict, List, Optional
 
-import pytest
+from ccai import testbase
 
 from ccai.restclient.aws.awserror import ClientError
 from ccai.restclient.aws.awstransport import (
@@ -187,7 +187,7 @@ def test_ec2_errors_carry_the_botocore_response_shape():
               "<Message>no such vpc</Message>"
               "</Error></Errors></Response>")))
 
-    with pytest.raises(ClientError) as caught:
+    with testbase.raises(ClientError) as caught:
         clients["ec2"].describe_vpcs()
 
     # Consumer code reads xcpt.response["Error"]["Code"].
@@ -204,7 +204,7 @@ def test_head_bucket_404_is_reported_as_code_404():
     clients, session = _clients()
     session.queue(FakeResponse(status_code=404, reason="Not Found", text=""))
 
-    with pytest.raises(ClientError) as caught:
+    with testbase.raises(ClientError) as caught:
         clients["s3"].head_bucket(Bucket="missing")
 
     # A failed HEAD has no body, so the status stands in as the code —
@@ -217,7 +217,7 @@ def test_head_bucket_403_is_not_mistaken_for_absent():
     clients, session = _clients()
     session.queue(FakeResponse(status_code=403, reason="Forbidden", text=""))
 
-    with pytest.raises(ClientError) as caught:
+    with testbase.raises(ClientError) as caught:
         clients["s3"].head_bucket(Bucket="denied")
 
     assert caught.value.response["Error"]["Code"] != "404"
@@ -389,7 +389,7 @@ def test_json_errors_read_the_type_field():
         payload={"__type": "com.amazon.ssm#ParameterNotFound",
                  "message": "no such parameter"}))
 
-    with pytest.raises(ClientError) as caught:
+    with testbase.raises(ClientError) as caught:
         clients["ssm"].get_parameter(Name="/missing")
 
     # JSON services qualify the type with a namespace that must be stripped.

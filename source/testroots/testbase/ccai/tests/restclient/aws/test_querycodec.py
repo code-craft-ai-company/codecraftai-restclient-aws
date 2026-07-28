@@ -19,7 +19,7 @@ __copyright__ = "Copyright 2026, Code Craft AI LLC"
 __credits__ = []
 
 
-import pytest
+from ccai import testbase
 
 from ccai.restclient.aws.querycodec import (
     decode_response, flatten_params, modeled_name, strip_namespace
@@ -163,7 +163,7 @@ EMPTY_VPCS = """<?xml version="1.0" encoding="UTF-8"?>
 # name mapping
 # ----------------------------------------------------------------------
 
-@pytest.mark.parametrize("wire,modeled", [
+@testbase.parametrize("wire,modeled", [
     ("vpcSet", "Vpcs"),
     ("subnetSet", "Subnets"),
     ("tagSet", "Tags"),
