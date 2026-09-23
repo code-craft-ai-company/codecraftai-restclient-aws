@@ -230,6 +230,8 @@ class AwsTransport:
                         rtnval = (str(typed).split("#")[-1], str(message))
                         return rtnval
             except Exception:
+                # Probing for a JSON error body; a body that does not decode as
+                # JSON is an XML (or empty) error body and is handled below.
                 pass
 
             found = self._error_from_xml(text=text)

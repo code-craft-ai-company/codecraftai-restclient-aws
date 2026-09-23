@@ -23,7 +23,9 @@ import xml.etree.ElementTree as ElementTree
 
 from ccai.restclient.aws.awstransport import AwsTransport, endpoint_for
 from ccai.restclient.aws.querycodec import (
-    decode_element, decode_response, flatten_params, strip_namespace
+    decode_response,
+    flatten_params,
+    strip_namespace,
 )
 
 

@@ -42,7 +42,7 @@ __credits__ = []
 
 import xml.etree.ElementTree as ElementTree
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 
 # Elements whose modelled name the mechanical rule gets wrong.  Keyed by the
