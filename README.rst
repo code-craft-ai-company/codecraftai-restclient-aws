@@ -46,5 +46,5 @@ Requests flatten the other way, into the Query protocol's dotted parameters
 zero-indexed list with a confusing "missing parameter" rather than an index
 error.
 
-Signing comes from :mod:`ccai.restclient.base.awssigv4`, already tested
+Signing comes from ``ccai.restclient.base.awssigv4``, already tested
 against AWS's published example.
