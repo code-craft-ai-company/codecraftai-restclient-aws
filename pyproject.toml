@@ -1,6 +1,6 @@
 [project]
 name = "codecraftai-restclient-aws"
-version = "1.2.0"
+version = "1.2.1"
 description = "Code Craft AI - AWS REST client"
 readme = "README.rst"
 license = "LicenseRef-CodeCraftAI-Source-Available"
